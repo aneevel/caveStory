@@ -8,6 +8,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 add_library(game src/game.cpp)
 add_library(graphics src/graphics.cpp)
 add_library(sprite src/sprite.cpp src/animated_sprite.cpp)
+add_library(input src/input.cpp)
+add_library(player src/player.cpp src/sprite.cpp src/animated_sprite.cpp)
 
 # Find SDL
 
@@ -20,4 +22,5 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 # create executable
 add_executable(${PROJECT_NAME} src/main.cpp)
-target_link_libraries(${PROJECT_NAME} game graphics sprite ${SDL_LIBRARY})
+target_link_libraries(${PROJECT_NAME} game graphics sprite input player
+   ${SDL_LIBRARY})
