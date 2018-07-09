@@ -1,6 +1,13 @@
+# No generated compilation configs, files, artifacts, etc.,
 CMakeCache.txt
 CMakeFiles/
 build/
 Makefile
 cmake_install.cmake
 compile_commands.json
+
+# No executables
+cavestory
+
+# No built libraries
+*.a
