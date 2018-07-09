@@ -1,19 +1,23 @@
 #pragma once
+#include "animated_sprite.h"
+#include <boost/scoped_ptr.hpp>
 
-struct SDL_Surface;
+class Graphics;
 
 class Game
 {
 	public:
-		
+
 		Game();
 		~Game();
+
+      static int kTileSize;
 
 	private:
 
 		void eventLoop();
-		void update();
-		void draw();
+		void update(int ms);
+		void draw(Graphics& graphics);
 
-		SDL_Surface* screen;
+      boost::scoped_ptr<AnimatedSprite> sprite;
 };

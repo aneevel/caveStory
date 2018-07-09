@@ -1,21 +1,17 @@
 #include "game.h"
+#include "graphics.h"
 #include <SDL/SDL.h>
 
-namespace {
-	const int kScreenWidth = 640;
-	const int kScreenHeight = 480;
-	const int kBitsPerPixel = 32;
+namespace  {
 	const int kFPS = 60;
 }
+
+int Game::kTileSize = 32;
 
 Game::Game() {
 
 	// Init SDL subsystems
 	SDL_Init(SDL_INIT_EVERYTHING);
-
-	// Create screen
-	screen = SDL_SetVideoMode(kScreenWidth, kScreenHeight, kBitsPerPixel,
-			SDL_FULLSCREEN);
 
 	// Remove cursor
 	SDL_ShowCursor( SDL_DISABLE );
@@ -25,14 +21,21 @@ Game::Game() {
 }
 
 Game::~Game() {
-	SDL_FreeSurface(screen);
 	SDL_Quit();
 }
 
 void Game::eventLoop() {
 
+   // Construct graphics core
+   Graphics graphics;
+
 	bool running = true;
+   int lastUpdateTime = SDL_GetTicks();
 	SDL_Event event;
+
+   // Construct sprite
+   sprite.reset(new AnimatedSprite("assets/MyChar.bmp", 0, 0, kTileSize, kTileSize,
+               15, 3 ));
 
 	// while (running) ~ 60 Hz
 	// Loop lasts 1000/60 ms
@@ -56,10 +59,12 @@ void Game::eventLoop() {
 		}
 
 		// Update phase
-		update();
+      int currentTime = SDL_GetTicks();
+		update(currentTime - lastUpdateTime);
+      lastUpdateTime = currentTime;
 
 		// Draw phase
-		draw();
+		draw(graphics);
 
 		// Output FPS diagnostic
 		const int ELAPSED_TIME = SDL_GetTicks() - START_TIME;
@@ -67,10 +72,16 @@ void Game::eventLoop() {
 
 		const float SECONDS_PER_FRAME = (SDL_GetTicks() - START_TIME) / 1000.0;
 		const float FPS = 1 / (SECONDS_PER_FRAME);
-		printf("FPS=%f\n", FPS);
 	}
 }
 
-void Game::draw() {}
+void Game::draw(Graphics& graphics) {
 
-void Game::update() {}
+   sprite->draw(graphics, 320, 240);
+   graphics.flip();
+}
+
+void Game::update(int ms) {
+
+   sprite->update(ms);
+}
