@@ -1,5 +1,7 @@
 #include "game.h"
 #include "graphics.h"
+#include "input.h"
+#include "player.h"
 #include <SDL/SDL.h>
 
 namespace  {
@@ -29,19 +31,23 @@ void Game::eventLoop() {
    // Construct graphics core
    Graphics graphics;
 
+	// Construct input core
+	Input input;
+
 	bool running = true;
-   int lastUpdateTime = SDL_GetTicks();
+	int lastUpdateTime = SDL_GetTicks();
 	SDL_Event event;
 
-   // Construct sprite
-   sprite.reset(new AnimatedSprite("assets/MyChar.bmp", 0, 0, kTileSize, kTileSize,
-               15, 3 ));
+   	// Construct sprite
+	player.reset(new Player(320, 240));
 
 	// while (running) ~ 60 Hz
 	// Loop lasts 1000/60 ms
 	while ( running ) {
 
+		// Start new frame
 		const int START_TIME = SDL_GetTicks();
+		input.beginNewFrame();
 
 		// Process SDL events
 		while (SDL_PollEvent(&event)) {
@@ -49,19 +55,55 @@ void Game::eventLoop() {
 
 				// Check for keypress
 				case SDL_KEYDOWN:
-					// Check for escape event
-					if (event.key.keysym.sym == SDLK_ESCAPE) {
-						running = false;
-					}
+					
+					// Pass event to input
+					input.keyDownEvent(event);
+					break;
+				
+				case SDL_KEYUP:
+
+					// Pass event to input
+					input.keyUpEvent(event);
+					break;
+
 				default:
 					break;
 			}
 		}
 
-		// Update phase
-      int currentTime = SDL_GetTicks();
+		// Evaluate input for QUIT
+		if (input.wasKeyPressed(SDLK_ESCAPE)) {
+			running = false;
+		}
+
+		// If left and right are being pressed, stop moving
+		if (input.isKeyHeld(SDLK_LEFT) && input.isKeyHeld(SDLK_RIGHT)) {
+
+			player->stopMoving();
+		}
+
+		// If left is being pressed, start moving left
+		else if (input.isKeyHeld(SDLK_LEFT)) {
+
+			player->startMovingLeft();
+		}
+
+		// If right is being pressed, start moving right
+		else if (input.isKeyHeld(SDLK_RIGHT)) {
+
+			player->startMovingRight();
+		}
+
+		// Else, stop moving
+		else {
+
+			player->stopMoving();
+		}
+
+		// Update time
+      	int currentTime = SDL_GetTicks();
 		update(currentTime - lastUpdateTime);
-      lastUpdateTime = currentTime;
+      	lastUpdateTime = currentTime;
 
 		// Draw phase
 		draw(graphics);
@@ -77,11 +119,12 @@ void Game::eventLoop() {
 
 void Game::draw(Graphics& graphics) {
 
-   sprite->draw(graphics, 320, 240);
+	graphics.clear();
+   player->draw(graphics);
    graphics.flip();
 }
 
 void Game::update(int ms) {
 
-   sprite->update(ms);
+   player->update(ms);
 }
