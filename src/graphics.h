@@ -13,6 +13,7 @@ class Graphics {
                   SDL_Rect* source_rect,
                   SDL_Rect* dest_rect);
    void flip();
+   void clear();
 
    private:
 
